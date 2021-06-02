@@ -1,7 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>HandbrakeCliWrapper</AssemblyName>
     <RootNamespace>HandbrakeCliWrapper</RootNamespace>
     <PackageId>HandbrakeCliWrapper</PackageId>
@@ -21,9 +20,10 @@
     <RepositoryType>GitHub</RepositoryType>
     <PackageTags>handbrake</PackageTags>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile/>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="MediaInfo.Wrapper.Core" Version="21.3.3"/>
+  </ItemGroup>
 </Project>

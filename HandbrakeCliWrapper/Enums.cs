@@ -70,9 +70,9 @@
     public enum AudioEncoder
     {
         none,
+        fdk_aac,
+        fdk_haac,
         av_aac,
-        ca_aac,
-        ca_haac,
         copy__aac,
         ac3,
         copy__ac3,
@@ -81,6 +81,7 @@
         copy__truehd,
         copy__dts,
         copy__dtshd,
+        copy__mp2,
         mp3,
         copy__mp3,
         vorbis,
@@ -126,7 +127,6 @@
     {
         x264,
         x264_10bit,
-        vce_h264,
         nvenc_h264,
         x265,
         x265_10bit,

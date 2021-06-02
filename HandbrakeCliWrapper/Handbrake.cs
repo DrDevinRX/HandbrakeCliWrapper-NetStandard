@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace HandbrakeCliWrapper
 {
@@ -20,6 +22,26 @@ namespace HandbrakeCliWrapper
         //private static readonly Regex HandbrakeShortOutputRegex =
         //    new Regex("Encoding:.*?, (\\d{1,3}\\.\\d{1,2}) %", RegexOptions.Compiled);
 
+        private List<AudioEncoder> _supportedAudioCodecs = null;
+        private List<Encoder> _supportedVideoCodecs = null;
+        public List<AudioEncoder> SupportedAudioCodecs
+        {
+            get
+            {
+                _supportedAudioCodecs ??= GetSupportedAudioCodecs();
+                return _supportedAudioCodecs;
+            }
+        }
+
+        public List<Encoder> SupportedVideoCodecs
+        {
+            get
+            {
+                _supportedVideoCodecs ??= GetSupportedVideoCodecs();
+                return _supportedVideoCodecs;
+            }
+        }
+
         private readonly string _hbCliPath;
         private Process _process;
         private string _out;
@@ -31,6 +53,62 @@ namespace HandbrakeCliWrapper
         public Handbrake(string handbrakePath = "./HandBrakeCLI")
         {
             _hbCliPath = handbrakePath;
+        }
+
+        public List<AudioEncoder> GetSupportedAudioCodecs()
+        {
+            Process p = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _hbCliPath,
+                    Arguments = "-h",
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            List<string> stdOut = new List<string>();
+            p.Start();
+            p.BeginOutputReadLine();
+
+            p.OutputDataReceived += (s, e) =>
+            {
+                stdOut.Add(e.Data);
+            };
+
+            p.WaitForExit();
+            p.CancelOutputRead();
+            int aEncoderIdx = stdOut.FindIndex(x => x.Trim().StartsWith("-E, --aencoder <string> Select audio encoder(s):"));
+            return stdOut.Skip(aEncoderIdx + 1).TakeWhile(x => !x.Trim().StartsWith("\"copy:<type>\" will pass through the corresponding")).Select(x => Enum.Parse<AudioEncoder>(x.Trim())).ToList();
+        }
+
+        public List<Encoder> GetSupportedVideoCodecs()
+        {
+            Process p = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _hbCliPath,
+                    Arguments = "-h",
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            List<string> stdOut = new List<string>();
+            p.Start();
+            p.BeginOutputReadLine();
+
+            p.OutputDataReceived += (s, e) =>
+            {
+                stdOut.Add(e.Data);
+            };
+
+            p.WaitForExit();
+            p.CancelOutputRead();
+            int aEncoderIdx = stdOut.FindIndex(x => x.Trim().StartsWith("-e, --encoder <string>  Select video encoder:"));
+            return stdOut.Skip(aEncoderIdx + 1).TakeWhile(x => !x.Trim().StartsWith("--encoder-preset <string>")).Select(x => Enum.Parse<Encoder>(x.Trim())).ToList();
         }
 
         /// <summary>
